@@ -1,0 +1,74 @@
+\ forth-tests.txt -- layer 3 tests: kernel words over the serial console (host.lisp ktest).
+\ Each line: INPUT ==> what the kernel prints after the echo, before " ok." (trimmed).
+\ Lines without ==> must just answer ok. Runs on a freshly booted kernel, before lisp.fs.
+1 2 + . ==> 3
+7 3 - . ==> 4
+6 7 * . ==> 42
+17 5 / . 17 5 mod . ==> 3 2
+-17 5 / . -17 5 mod . ==> -3 -2
+17 5 /mod . . ==> 3 2
+-7 abs . 5 negate . ==> 7 -5
+1 2 swap . . ==> 1 2
+1 2 over . . . ==> 1 2 1
+1 2 3 rot . . . ==> 1 3 2
+1 2 3 -rot . . . ==> 2 1 3
+1 2 nip . 1 2 tuck . . . ==> 2 2 1 2
+1 2 3 2 pick . . . . ==> 1 3 2 1
+0 ?dup . 5 ?dup . . ==> 0 5 5
+1 2 2dup . . . . ==> 2 1 2 1
+1 2 3 2drop . ==> 1
+depth . 1 2 depth . 2drop ==> 0 2
+3 4 = . 4 4 = . 3 4 <> . ==> 0 -1 -1
+-1 0 < . 1 0 > . -1 0 u< . ==> -1 -1 0
+3 3 <= . 2 3 >= . ==> -1 0
+0 0= . 5 0<> . -5 0< . ==> -1 -1 -1
+3 5 min . 3 5 max . ==> 3 5
+1 4 lshift . 256 4 rshift . -16 2 arshift . ==> 16 16 -4
+12 10 and . 12 10 or . 12 10 xor . 12 4 bic . ==> 8 14 6 8
+0 invert . 5 1+ . 5 1- . 5 2* . -6 2/ . ==> -1 6 4 10 -3
+3 cells . 4 cell+ . ==> 12 8
+100000 100000 m* . . ==> 2 1410065408
+hex ff . decimal $ff . #10 . %101 . ==> FF 255 10 5
+10 base ! -42 . ==> -42
+5 u. -1 u. ==> 5 4294967295
+65 emit 66 emit ==> AB
+: sq dup * ; 7 sq . ==> 49
+: fact dup 2 < if drop 1 else dup 1- recurse * then ; 10 fact . ==> 3628800
+: cnt 0 swap 0 do 1+ loop ; 1000 cnt . ==> 1000
+: evens 10 0 do i . 2 +loop ; evens ==> 0 2 4 6 8
+: nest 3 0 do 2 0 do j . i . loop loop ; nest ==> 0 0 0 1 1 0 1 1 2 0 2 1
+: none 0 0 ?do 99 . loop ; none ==>
+: lv 10 0 do i 3 = if leave then i . loop ; lv ==> 0 1 2
+: bw begin dup . 1- dup 0= until drop ; 3 bw ==> 3 2 1
+: wr begin dup 0> while dup . 1- repeat drop ; 3 wr ==> 3 2 1
+: hi ." hello" ; hi ==> hello
+: sl s" abc" type ; sl ==> abc
+: ch [char] A emit ; ch ==> A
+: li [ 6 7 * ] literal . ; li ==> 42
+42 constant answer answer . ==> 42
+7 variable v v @ . 5 v +! v @ . ==> 7 12
+16 buffer: buf buf 16 65 fill buf 3 type ==> AAA
+create? ==> create? not found.
+s" abc" s" abc" compare . s" abc" s" abd" compare . ==> -1 0
+pad? ==> pad? not found.
+1 2 3 sp@ 8 + sp! . ==> 1
+' sq 3 swap execute . ==> 9
+: im 42 ; immediate : use im ; . ==> 42
+1 2 >r . r> . ==> 1 2
+5 >r r@ . rdrop ==> 5
+1 2 \ comment 3
+. . ==> 2 1
+1 ( comment ) 2 + . ==> 3
+256 here ! here @ . here c@ . ==> 256 0
+-1 here ! 5 here c! here @ . ==> -251
+here 4 + here 2 move ==>
+undefined-word ==> undefined-word not found.
+drop ==> Stack underflow
+1 2x+ ==> 2x+ not found.
+3 s>f 4 s>f f+ f>s . ==> 7
+7 s>f 2 s>f f- f>s . 7 s>f 2 s>f f* f>s . ==> 5 14
+1 s>f 3 s>f f/ hex u. decimal ==> 3EAAAAAB
+-7 s>f f>s . 7 s>f 2 s>f f/ f>s . ==> -7 3
+16 s>f fsqrt f>s . ==> 4
+1 s>f 2 s>f f< . 2 s>f 1 s>f f< . 2 s>f 2 s>f f= . ==> -1 0 -1
+: sq2 1 ; : sq2 2 ; sq2 . ==> Redefine sq2. 2

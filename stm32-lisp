@@ -1,0 +1,20 @@
+#!/bin/sh
+# stm32-lisp -- boot the Forth kernel for the STM32F446 in QEMU (netduinoplus2; 128 KiB RAM and
+# 512 KiB flash used), load the Scheme through the host, then attach its REPL.
+# Quit with ctrl-c; (forth) returns to the Forth prompt. PORT picks the TCP port (default 4444).
+# Tools come from PATH unless set: QEMU (qemu-system-arm), SBCL (sbcl), NC (nc), STTY (stty).
+set -e
+HERE=$(cd "$(dirname "$0")" && pwd)
+CORE=${FORTHLISP_CORE:-$HERE}; [ -f "$CORE/host.lisp" ] || CORE=$HERE/../forthlisp   # core repo checkout
+IMG=$HERE/kernel-f446.bin
+PORT=${PORT:-4444}
+[ -f "$IMG" ] || "$HERE/build-firmware.sh" >/dev/null
+"${QEMU:-qemu-system-arm}" -M netduinoplus2 -kernel "$IMG" -display none -monitor none \
+  -serial null -serial tcp:127.0.0.1:$PORT,server,nowait 2>/dev/null &
+QPID=$!
+trap 'kill $QPID 2>/dev/null; ${STTY:-stty} sane 2>/dev/null' EXIT HUP INT TERM
+PORT=$PORT "${SBCL:-sbcl}" --script "$CORE/host.lisp" load
+echo
+echo "target Lisp ready: type an expression, (forth) returns to Forth, ctrl-c quits"
+${STTY:-stty} -echo -icanon 2>/dev/null || true   # the chip echoes; no tty when piped
+${NC:-nc} 127.0.0.1 $PORT

@@ -1,0 +1,15 @@
+#!/bin/sh
+# stm32-forth -- boot the Forth kernel for the STM32F446 in QEMU (netduinoplus2) and give its prompt.
+# Usage: stm32-forth                 interactive prompt on this terminal; ctrl-c quits
+#        PORT=4444 stm32-forth       serve the console on 127.0.0.1:PORT instead
+#        printf '1 2 + .\n' | stm32-forth    scripted (add a timeout yourself)
+# QEMU (default qemu-system-arm) and SBCL (default sbcl) come from PATH unless set.
+HERE=$(cd "$(dirname "$0")" && pwd)
+IMG=$HERE/kernel-f446.bin
+[ -f "$IMG" ] || "$HERE/build-firmware.sh" >/dev/null
+if [ -n "$PORT" ]; then
+  exec "${QEMU:-qemu-system-arm}" -M netduinoplus2 -kernel "$IMG" -display none -monitor none \
+    -serial null -serial tcp:127.0.0.1:$PORT,server,nowait
+fi
+exec "${QEMU:-qemu-system-arm}" -M netduinoplus2 -kernel "$IMG" -display none -monitor none \
+  -serial null -serial stdio 2>/dev/null

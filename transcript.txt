@@ -1,0 +1,65 @@
+
+=== Layer 1: host Lisp compiles Lisp to Forth and runs it on the chip ===
+  ok.
+[compiled] : sq dup over * nip ;
+: sq dup over * nip ;  ok.
+[compiled] : fact dup 2 < if 1 else dup over 1 - recurse * then nip ;
+: fact dup 2 < if 1 else dup over 1 - recurse * then nip ;  ok.
+7 sq . 49  ok.
+10 fact . 3628800  ok.
+
+=== Layer 2: load the Forth Lisp (core lisp.fs + prims compiled from prims.lisp) ===
+unused . 35672  ok.
+ 35672  ok.
+
+=== Layer 3: Lisp (host) -> Forth (chip) -> Lisp (chip) ===
+lisp 
+> (+ 1 2) 
+3
+> (+ 1 2) => 3
+(define (sq x) (* x x)) 
+sq
+> (define (sq x) (* x x)) => sq
+(sq 7) 
+49
+> (sq 7) => 49
+(define (fact n) (if (< n 2) 1 (* n (fact (- n 1))))) 
+fact
+> (define (fact n) (if (< n 2) 1 (* n (fact (- n 1))))) => fact
+(fact 7) 
+5040
+> (fact 7) => 5040
+(cons 1 (cons 2 '())) 
+(1 2)
+> (cons 1 (cons 2 '())) => (1 2)
+(car '(a b c)) 
+a
+> (car '(a b c)) => a
+(define (my-map f l) (if (null? l) '() (cons (f (car l)) (my-map f (cdr l))))) 
+my-map
+> (define (my-map f l) (if (null? l) '() (cons (f (car l)) (my-map f (cdr l))))) => my-map
+(my-map sq '(1 2 3 4)) 
+(1 4 9 16)
+> (my-map sq '(1 2 3 4)) => (1 4 9 16)
+((lambda (x y) (- x y)) 10 3) 
+7
+> ((lambda (x y) (- x y)) 10 3) => 7
+(map fact '(1 2 3 4 5)) 
+(1 2 6 24 120)
+> (map fact '(1 2 3 4 5)) => (1 2 6 24 120)
+(let loop ((i 0)) (if (< i 10000) (loop (+ i 1)) i)) 
+10000
+> (let loop ((i 0)) (if (< i 10000) (loop (+ i 1)) i)) => 10000
+(eq? (car '(a)) 'a) 
+#t
+> (eq? (car '(a)) 'a) => #t
+(< 2 1) 
+#f
+> (< 2 1) => #f
+(forth) 
+ ok.
+(forth) => back at the Forth prompt
+unused . 35672  ok.
+ 35672  ok.
+
+SUCCESS: all three layers answered as expected.

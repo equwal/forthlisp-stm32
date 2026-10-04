@@ -1,0 +1,46 @@
+FORTH CHEAT SHEET   (our own kernel, STM32F446 on QEMU netduinoplus2)
+=====================================================================
+Forth reads words left to right. Numbers go on the stack. Words
+eat from the stack and push results. ".s" shows the stack.
+Editing: Backspace and Delete both erase the last character.
+
+STACK
+  1 2 3 .s        show stack                  -> 1 2 3
+  .  u.           print and drop top          5 .  -> 5
+  dup drop swap over rot -rot nip tuck pick ?dup 2dup 2drop depth
+  >r r> r@ rdrop  move items to/from the return stack
+
+ARITHMETIC  (32-bit integers)
+  + - * / mod /mod u/mod m* um*   17 5 /mod . . -> 3 2
+  negate abs min max 1+ 1- 2+ 2- 2* 2/ cells cell+
+  hex decimal     hex FF decimal .  -> 255    also $FF #10 %101
+
+COMPARE AND LOGIC   (true = -1, false = 0)
+  = <> < > <= >= u< u> 0= 0<> 0< 0>
+  and or xor invert bic lshift rshift arshift
+
+DEFINE WORDS
+  : sq ( n -- n*n ) dup * ;      7 sq .  -> 49
+  ( ... ) comment   \ comment to end of line   words   lists every word
+  immediate  recurse  literal  [ ]  '  [']  [char]  execute
+
+CONTROL FLOW  (inside : ... ;)
+  : sign dup 0< if ." neg" else ." pos" then drop ;
+  : count10 10 0 do i . loop ;          -> 0 1 2 ... 9
+  : evens 10 0 do i . 2 +loop ;         -> 0 2 4 6 8
+  : down begin dup . 1- dup 0= until drop ;   5 down -> 5 4 3 2 1
+  begin ... while ... repeat   begin ... again   ?do   leave unloop i j
+
+VARIABLES AND MEMORY
+  42 variable x   initial value comes FIRST   x @ . -> 42
+  7 x !   5 x +!   42 constant answer   16 buffer: buf
+  @ ! c@ c! h@ h! +! bis! bic! cbis! cbic! move fill compare count
+  here allot , c, align unused  type emit key key? cr space
+  s" text" type   ." text"   (s" also works at the prompt)
+
+TRY THESE
+  : fib ( n -- f ) 0 1 rot 0 ?do over + swap loop drop ;   10 fib . -> 55
+  : stars 0 ?do 42 emit loop ;                  5 stars  -> *****
+  : fact ( n -- n! ) 1 swap 1+ 1 ?do i * loop ;  6 fact . -> 720
+
+QUIT:  Ctrl-C stops QEMU. Words you define live in RAM and are lost.
