@@ -19,7 +19,7 @@
 (defconstant +rstop+ #x2001FFE0)          ; return stack: 4 KiB below this (QEMU: keep off the last 32 bytes)
 (defconstant +dict-limit+ #x2001DEE0)     ; dictionary stops 256 bytes above the data stack
 (defconstant +usart2+ #x40004400)
-(defparameter *sysvars* '("state" "base" "latest" "dp" ">in" "#tib" "hld" "nneg"))
+(defparameter *sysvars* '("state" "base" "latest" "dp" ">in" "#tib" "hld" "nneg" "emit-hook"))
 
 ;;; ---------- dictionary ----------
 (defvar *xts* (make-hash-table :test 'equal))
@@ -208,11 +208,14 @@
     (defcode "f<" () (fcmp :mi))
     (defcode "f=" () (fcmp :eq)))
   ;; console: USART2, polled
-  (defcode "emit" ()
-    (let ((wait (label)))
+  (defcode "emit" ()                     ; emit-hook = 0: USART2; else execute the hook with c on the stack
+    (let ((wait (label)) (hook (label)) (done (label)))
+      (li :r1 (+ +sysvars+ 32)) (ldr :r1 :r1) (cmp-imm8 :r1 0) (bcc :ne hook)
       (li :r1 +usart2+) (movw :r2 #x80)
       (mark wait) (ldr :r0 :r1) (tst-reg :r0 :r2) (bcc :eq wait)
-      (str :tos :r1 4) (dpop :tos)))
+      (str :tos :r1 4) (dpop :tos) (b done)
+      (mark hook) (mov :w :r1) (ldr :r0 :w) (bx :r0)
+      (mark done)))
   (defcode "key" ()
     (let ((wait (label)))
       (li :r1 +usart2+) (movw :r2 #x20)
@@ -239,6 +242,7 @@
   (movw :r0 10) (str :r0 :r1 4)                                  ; base
   (li :r0 *last-link*) (str :r0 :r1 8)                           ; latest
   (li :r0 +ram-dict+) (str :r0 :r1 12)                           ; dp
+  (movw :r0 0) (str :r0 :r1 32)                                  ; emit-hook: console
   (li :psp +dstop+) (movw :tos 0)
   (li :ip cold-thread) (next)
   (mark fault)                                                    ; print FAULT, then system reset

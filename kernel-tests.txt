@@ -1,1 +1,1 @@
-kernel tests: 71 passed, 0 failed, 71 total
+kernel tests: 72 passed, 0 failed, 72 total

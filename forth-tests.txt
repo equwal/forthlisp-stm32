@@ -72,3 +72,4 @@ drop ==> Stack underflow
 16 s>f fsqrt f>s . ==> 4
 1 s>f 2 s>f f< . 2 s>f 1 s>f f< . 2 s>f 2 s>f f= . ==> -1 0 -1
 : sq2 1 ; : sq2 2 ; sq2 . ==> Redefine sq2. 2
+' drop emit-hook ! 65 emit 0 emit-hook ! 66 emit ==> B
