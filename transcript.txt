@@ -9,8 +9,8 @@
 10 fact . 3628800  ok.
 
 === Layer 2: load the Forth Lisp (core lisp.fs + prims compiled from prims.lisp) ===
-unused . 35672  ok.
- 35672  ok.
+unused . 23988  ok.
+ 23988  ok.
 
 === Layer 3: Lisp (host) -> Forth (chip) -> Lisp (chip) ===
 lisp 
@@ -59,7 +59,7 @@ my-map
 (forth) 
  ok.
 (forth) => back at the Forth prompt
-unused . 35672  ok.
- 35672  ok.
+unused . 23988  ok.
+ 23988  ok.
 
 SUCCESS: all three layers answered as expected.
