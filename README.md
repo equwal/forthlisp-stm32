@@ -54,7 +54,7 @@ A real board takes the image with `st-flash write kernel-f446.bin 0x8000000`.
 |---|---|---|---|
 | 1-2 | `asm-test.lisp`: every encoder form byte-identical to GNU as | `asm-tests.txt` | 105/105 |
 | 3 | `forth-tests.txt`: kernel words over the serial console | `kernel-tests.txt` | 71/71 |
-| 4 | the core's `r7rs-tests.scm` | core `conformance.txt` | 380/380 |
+| 4 | the core's `r7rs-tests.scm` | core `conformance.txt` | 390/390 |
 | 4 | chibi-scheme's R7RS suite | core `tests/r7rs/results.txt` | 603 pass / 140 fail / 389 skip |
 
 ## Limits
