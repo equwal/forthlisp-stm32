@@ -74,3 +74,9 @@ A real board takes the image with `st-flash write kernel-f446.bin 0x8000000`.
 ## Licence
 
 MIT (see `LICENSE`).
+
+## CI
+
+`ci-local.sh` (in the forthlisp core repo) runs every test layer of all three repos in a
+clean `ubuntu:24.04` container. It runs after each publish, without a hosted CI service.
+The last result is on https://dickt.store/forthlisp/.
